@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>Farixd — Spy Script</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg: #FDF7E4;
+      --bg-secondary: #FFFFFF;
+      --text-primary: #1A1A1A;
+      --text-secondary: #555555;
+      --border: #1A1A1A;
+      --accent: #9B5DE5;
+      --accent-secondary: #FFD23F;
+      --accent-green: #2DD881;
+      --accent-blue: #4ECDC4;
+      --accent-red: #FF6B35;
+      --accent-pink: #F15BB5;
+      --shadow: 4px 4px 0px #1A1A1A;
+      --shadow-lg: 6px 6px 0px #1A1A1A;
+      --radius: 12px;
+    }
+
+    body {
+      font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      line-height: 1.6;
+      background-image:
+        radial-gradient(circle at 20% 80%, rgba(155, 93, 229, 0.12) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(241, 91, 181, 0.1) 0%, transparent 50%);
+    }
+
+    .container {
+      max-width: 750px;
+      width: 100%;
+    }
+
+    /* Settings Panel */
+    .settings-panel {
+      background: var(--bg-secondary);
+      border: 4px solid var(--border);
+      border-radius: 20px;
+      padding: 24px;
+      margin-bottom: 20px;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .settings-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .settings-header h3 {
+      font-size: 16px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .settings-toggle {
+      font-size: 20px;
+      transition: transform 0.2s ease;
+    }
+
+    .settings-toggle.open {
+      transform: rotate(180deg);
+    }
+
+    .settings-body {
+      margin-top: 20px;
+      display: none;
+      border-top: 3px dashed var(--border);
+      padding-top: 20px;
+    }
+
+    .settings-body.show {
+      display: block;
+    }
+
+    .settings-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 14px;
+    }
+
+    .setting-item {
+      background: var(--bg);
+      border: 3px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      text-align: center;
+      position: relative;
+      box-shadow: var(--shadow);
+    }
+
+    .setting-item:hover {
+      transform: translate(-2px, -2px);
+      box-shadow: 6px 6px 0px var(--border);
+    }
+
+    .setting-item.active {
+      background: var(--accent);
+      color: white;
+      border-color: var(--border);
+    }
+
+    .setting-item.active .setting-desc {
+      color: rgba(255,255,255,0.85);
+    }
+
+    .setting-icon {
+      font-size: 24px;
+      margin-bottom: 6px;
+    }
+
+    .setting-title {
+      font-weight: 700;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .setting-desc {
+      font-size: 11px;
+      color: var(--text-secondary);
+      margin-top: 4px;
+      font-weight: 500;
+    }
+
+    .setting-badge {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      background: var(--accent-red);
+      color: white;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 20px;
+      border: 2px solid var(--border);
+      box-shadow: 2px 2px 0px var(--border);
+    }
+
+    /* Cooldown indicator */
+    .cooldown-bar {
+      margin-top: 16px;
+      background: var(--bg);
+      border: 3px solid var(--border);
+      border-radius: 8px;
+      height: 24px;
+      overflow: hidden;
+      display: none;
+      box-shadow: var(--shadow);
+    }
+
+    .cooldown-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent-red), var(--accent-pink));
+      width: 100%;
+      transition: width 0.1s linear;
+    }
+
+    .cooldown-text {
+      text-align: center;
+      font-size: 11px;
+      font-weight: 700;
+      margin-top: 6px;
+      color: var(--accent-red);
+      display: none;
+    }
+
+    /* Card */
+    .card {
+      background: var(--bg-secondary);
+      border: 4px solid var(--border);
+      border-radius: 20px;
+      padding: 32px;
+      box-shadow: var(--shadow-lg);
+      position: relative;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 28px;
+      padding-bottom: 20px;
+      border-bottom: 4px dashed var(--border);
+    }
+
+    .header-badge {
+      display: inline-block;
+      background: var(--accent);
+      color: white;
+      padding: 6px 16px;
+      border-radius: 50px;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+      border: 3px solid var(--border);
+      box-shadow: 3px 3px 0px var(--border);
+    }
+
+    .header h1 {
+      font-size: 28px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .header p {
+      color: var(--text-secondary);
+      font-size: 14px;
+      font-weight: 500;
+      margin-top: 4px;
+    }
+
+    /* Active settings tags */
+    .active-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+
+    .active-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 5px 10px;
+      background: var(--accent-secondary);
+      border: 2px solid var(--border);
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      box-shadow: 2px 2px 0px var(--border);
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+      color: var(--text-primary);
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 14px 18px;
+      background: var(--bg);
+      border: 3px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text-primary);
+      font-size: 14px;
+      font-family: inherit;
+      font-weight: 500;
+      outline: none;
+      transition: all 0.15s ease;
+    }
+
+    .form-input:focus {
+      box-shadow: var(--shadow);
+      transform: translate(-2px, -2px);
+    }
+
+    .btn {
+      width: 100%;
+      padding: 16px 24px;
+      background: var(--accent);
+      border: 4px solid var(--border);
+      border-radius: var(--radius);
+      color: white;
+      font-size: 16px;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      box-shadow: var(--shadow-lg);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .btn:hover:not(:disabled) {
+      transform: translate(-3px, -3px);
+      box-shadow: 10px 10px 0px var(--border);
+    }
+
+    .btn:active:not(:disabled) {
+      transform: translate(3px, 3px);
+      box-shadow: none;
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: var(--shadow);
+    }
+
+    /* Result area with tabs */
+    .result-area {
+      margin-top: 24px;
+      background: var(--bg);
+      border: 3px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      display: none;
+    }
+
+    .result-tabs {
+      display: flex;
+      border-bottom: 3px solid var(--border);
+      overflow-x: auto;
+    }
+
+    .result-tab {
+      padding: 12px 20px;
+      font-weight: 700;
+      font-size: 12px;
+      text-transform: uppercase;
+      cursor: pointer;
+      background: var(--bg-secondary);
+      border: none;
+      border-right: 2px solid var(--border);
+      font-family: inherit;
+      transition: 0.1s;
+      white-space: nowrap;
+    }
+
+    .result-tab.active {
+      background: var(--accent);
+      color: white;
+    }
+
+    .result-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 18px;
+    }
+
+    .result-header span {
+      font-weight: 700;
+      font-size: 13px;
+      text-transform: uppercase;
+    }
+
+    .copy-btn {
+      background: var(--accent-secondary);
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 16px;
+      font-weight: 700;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 3px 3px 0px var(--border);
+      transition: 0.1s ease;
+      font-family: inherit;
+    }
+
+    .copy-btn:active {
+      transform: translate(2px, 2px);
+      box-shadow: none;
+    }
+
+    pre {
+      background: #1e1e2f;
+      color: #f8f8f2;
+      padding: 20px;
+      font-size: 13px;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+      border-top: 3px solid var(--border);
+      max-height: 450px;
+      font-family: 'Space Grotesk', monospace;
+      line-height: 1.5;
+      margin: 0;
+    }
+
+    .error-message {
+      background: #FFE0E0;
+      border: 3px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      color: #b00020;
+      font-weight: 600;
+      margin-top: 16px;
+      display: none;
+      box-shadow: var(--shadow);
+    }
+
+    .footer-decoration {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .footer-decoration span {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+    }
+
+    .footer-decoration span:nth-child(1) { background: var(--accent); }
+    .footer-decoration span:nth-child(2) { background: var(--accent-secondary); }
+    .footer-decoration span:nth-child(3) { background: var(--accent-green); }
+    .footer-decoration span:nth-child(4) { background: var(--accent-blue); }
+    .footer-decoration span:nth-child(5) { background: var(--accent-pink); }
+
+    @media (max-width: 500px) {
+      .card { padding: 20px; }
+      .header h1 { font-size: 22px; }
+      .settings-grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Settings Panel -->
+    <div class="settings-panel">
+      <div class="settings-header" id="settingsHeader">
+        <h3>⚙️ Pengaturan Spy</h3>
+        <span class="settings-toggle" id="settingsToggle">▼</span>
+      </div>
+      <div class="settings-body" id="settingsBody">
+        <div class="settings-grid" id="settingsGrid">
+          <!-- Script Terpisah -->
+          <div class="setting-item active" data-setting="splitScripts">
+            <div class="setting-icon">📂</div>
+            <div class="setting-title">Script Terpisah</div>
+            <div class="setting-desc">Pisahkan JS/CSS/HTML</div>
+          </div>
+          <!-- Pakar -->
+          <div class="setting-item" data-setting="expert">
+            <div class="setting-icon">🧠</div>
+            <div class="setting-title">Pakar</div>
+            <div class="setting-desc">Hasil maksimal & detail</div>
+          </div>
+          <!-- Fast -->
+          <div class="setting-item" data-setting="fast">
+            <div class="setting-icon">⚡</div>
+            <div class="setting-title">Fast</div>
+            <div class="setting-desc">Percepat proses scraping</div>
+            <span class="setting-badge">BETA</span>
+          </div>
+          <!-- Raw -->
+          <div class="setting-item" data-setting="raw">
+            <div class="setting-icon">📄</div>
+            <div class="setting-title">Raw</div>
+            <div class="setting-desc">Tampilkan mentah semua</div>
+          </div>
+          <!-- Beautify -->
+          <div class="setting-item" data-setting="beautify">
+            <div class="setting-icon">✨</div>
+            <div class="setting-title">Beautify</div>
+            <div class="setting-desc">Rapikan format code</div>
+          </div>
+        </div>
+        <!-- Cooldown Bar -->
+        <div class="cooldown-bar" id="cooldownBar">
+          <div class="cooldown-fill" id="cooldownFill"></div>
+        </div>
+        <div class="cooldown-text" id="cooldownText">⏳ Cooldown: 60 detik</div>
+      </div>
+    </div>
+
+    <!-- Main Card -->
+    <div class="card">
+      <div class="header">
+        <div class="header-badge">🕵️ Spy Tool</div>
+        <h1>🔍 Farixd - Spy Script</h1>
+        <p>Tempel link web, bongkar source code-nya langsung</p>
+      </div>
+
+      <!-- Active Settings Tags -->
+      <div class="active-tags" id="activeTags">
+        <span class="active-tag">📂 Script Terpisah</span>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="urlInput">🌐 Link Target</label>
+        <input type="url" id="urlInput" class="form-input" placeholder="https://example.com" autocomplete="off" spellcheck="false">
+      </div>
+
+      <button id="spyBtn" class="btn">
+        <span>⚡</span> Bongkar Script
+      </button>
+
+      <div id="errorBox" class="error-message"></div>
+
+      <div id="resultBox" class="result-area">
+        <div class="result-tabs" id="resultTabs">
+          <button class="result-tab active" data-tab="html">HTML</button>
+        </div>
+        <div class="result-header">
+          <span id="resultLabel">📄 Hasil Source Code</span>
+          <button id="copyBtn" class="copy-btn">📋 Salin</button>
+        </div>
+        <pre id="codeOutput"></pre>
+      </div>
+    </div>
+
+    <div class="footer-decoration">
+      <span></span><span></span><span></span><span></span><span></span>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      // === DOM Elements ===
+      const urlInput = document.getElementById('urlInput');
+      const spyBtn = document.getElementById('spyBtn');
+      const resultBox = document.getElementById('resultBox');
+      const codeOutput = document.getElementById('codeOutput');
+      const errorBox = document.getElementById('errorBox');
+      const copyBtn = document.getElementById('copyBtn');
+      const resultLabel = document.getElementById('resultLabel');
+      const resultTabs = document.getElementById('resultTabs');
+      const activeTags = document.getElementById('activeTags');
+      const cooldownBar = document.getElementById('cooldownBar');
+      const cooldownFill = document.getElementById('cooldownFill');
+      const cooldownText = document.getElementById('cooldownText');
+      const settingsHeader = document.getElementById('settingsHeader');
+      const settingsBody = document.getElementById('settingsBody');
+      const settingsToggle = document.getElementById('settingsToggle');
+
+      // === State ===
+      const COOLDOWN_SECONDS = 60;
+      let cooldownRemaining = 0;
+      let cooldownInterval = null;
+      let isProcessing = false;
+
+      // Settings state
+      const settings = {
+        splitScripts: true,   // default aktif
+        expert: false,
+        fast: false,
+        raw: false,
+        beautify: false
+      };
+
+      // Stored parsed scripts
+      let parsedData = {
+        html: '',
+        css: '',
+        js: '',
+        all: ''
+      };
+
+      // === Settings Panel Toggle ===
+      settingsHeader.addEventListener('click', () => {
+        const isOpen = settingsBody.classList.toggle('show');
+        settingsToggle.classList.toggle('open', isOpen);
+      });
+
+      // === Settings Click Handler ===
+      document.getElementById('settingsGrid').addEventListener('click', (e) => {
+        const item = e.target.closest('.setting-item');
+        if (!item) return;
+
+        const settingKey = item.dataset.setting;
+        if (!settingKey) return;
+
+        // Toggle setting
+        settings[settingKey] = !settings[settingKey];
+
+        // Update UI
+        if (settings[settingKey]) {
+          item.classList.add('active');
+        } else {
+          item.classList.remove('active');
+        }
+
+        // Jika Pakar aktif, nonaktifkan Fast (mutually exclusive)
+        if (settingKey === 'expert' && settings.expert) {
+          settings.fast = false;
+          document.querySelector('[data-setting="fast"]').classList.remove('active');
+        }
+        if (settingKey === 'fast' && settings.fast) {
+          settings.expert = false;
+          document.querySelector('[data-setting="expert"]').classList.remove('active');
+        }
+        // Jika Raw aktif, nonaktifkan Beautify
+        if (settingKey === 'raw' && settings.raw) {
+          settings.beautify = false;
+          document.querySelector('[data-setting="beautify"]').classList.remove('active');
+        }
+        if (settingKey === 'beautify' && settings.beautify) {
+          settings.raw = false;
+          document.querySelector('[data-setting="raw"]').classList.remove('active');
+        }
+
+        updateActiveTags();
+      });
+
+      // === Update Active Tags ===
+      function updateActiveTags() {
+        const tags = [];
+        if (settings.splitScripts) tags.push('📂 Script Terpisah');
+        if (settings.expert) tags.push('🧠 Pakar');
+        if (settings.fast) tags.push('⚡ Fast');
+        if (settings.raw) tags.push('📄 Raw');
+        if (settings.beautify) tags.push('✨ Beautify');
+
+        activeTags.innerHTML = tags.map(t => `<span class="active-tag">${t}</span>`).join('');
+      }
+
+      // === URL Validation ===
+      function isValidUrl(str) {
+        try {
+          const url = new URL(str);
+          return url.protocol === 'http:' || url.protocol === 'https:';
+        } catch (_) {
+          return false;
+        }
+      }
+
+      // === Error Display ===
+      function showError(msg) {
+        errorBox.textContent = '❌ ' + msg;
+        errorBox.style.display = 'block';
+        resultBox.style.display = 'none';
+      }
+
+      function hideError() {
+        errorBox.style.display = 'none';
+      }
+
+      // === Cooldown ===
+      function startCooldown() {
+        cooldownRemaining = COOLDOWN_SECONDS;
+        cooldownBar.style.display = 'block';
+        cooldownText.style.display = 'block';
+        cooldownFill.style.width = '100%';
+        spyBtn.disabled = true;
+        updateCooldownUI();
+
+        cooldownInterval = setInterval(() => {
+          cooldownRemaining--;
+          if (cooldownRemaining <= 0) {
+            clearInterval(cooldownInterval);
+            cooldownInterval = null;
+            cooldownBar.style.display = 'none';
+            cooldownText.style.display = 'none';
+            spyBtn.disabled = false;
+            spyBtn.innerHTML = '<span>⚡</span> Bongkar Script';
+          }
+          updateCooldownUI();
+        }, 1000);
+      }
+
+      function updateCooldownUI() {
+        const percent = (cooldownRemaining / COOLDOWN_SECONDS) * 100;
+        cooldownFill.style.width = percent + '%';
+        cooldownText.textContent = `⏳ Cooldown: ${cooldownRemaining} detik`;
+        if (cooldownRemaining > 0) {
+          spyBtn.innerHTML = `<span>⏳</span> Tunggu ${cooldownRemaining}s`;
+        }
+      }
+
+      // === Fetch Source ===
+      async function fetchSourceCode(url) {
+        const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url);
+        
+        // Jika mode fast, tambahkan timeout lebih pendek
+        const fetchOptions = settings.fast ? { signal: AbortSignal.timeout(8000) } : {};
+        
+        const response = await fetch(proxyUrl, fetchOptions);
+
+        if (!response.ok) {
+          throw new Error(`Gagal mengambil halaman (status ${response.status})`);
+        }
+
+        const text = await response.text();
+
+        if (!text || text.trim().length === 0) {
